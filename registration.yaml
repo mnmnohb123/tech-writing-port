@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: 平安医院门诊管理系统 - 挂号模块
+  description: |
+    本文档定义了就医平台挂号流程的标准 RESTful 接口。
+    设计原则：
+      - 资源导向
+      - 驼峰命名
+      - 严格状态码限制
+  version: 1.2.0
+servers:
+  - url: https://api.pingan-hospital.com/api/v1
+    description: 生产环境
+  - url: https://staging.api.pingan-hospital.com/api/v1
+    description: 测试环境
+
+security:
+  - bearerAuth: []
+
+paths:
+  /departments:
+    get:
+      summary: 获取科室列表
+      tags: [基础数据]
+      responses:
+        '200':
+          description: 成功返回科室数组
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Department'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /schedules:
+    get:
+      summary: 查询医生排班
+      description: 根据科室 ID 和日期筛选可预约的医生排班
+      tags: [基础数据]
+      parameters:
+        - name: departmentId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 科室唯一标识符
+        - name: appointmentDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: 查询日期 (YYYY-MM-DD)
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: 每页数量
+      responses:
+        '200':
+          description: 排班列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /registrations:
+    post:
+      summary: 提交预约挂号
+      tags: [挂号业务]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '201':
+          description: 挂号创建成功
+          headers:
+            Location:
+              description: 新挂号记录 URL
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      summary: 获取当前患者挂号记录列表
+      tags: [挂号业务]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 用户的挂号历史
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegistrationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /registrations/{registrationId}/status:
+    patch:
+      summary: 更新挂号状态（如取消预约）
+      tags: [挂号业务]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: registrationId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 挂号记录唯一 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [CANCELLED]
+                  description: 目标状态，目前仅支持取消
+      responses:
+        '204':
+          description: 状态更新成功，无返回内容
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "心血管内科"
+        sortOrder:
+          type: integer
+          description: 显示排序权重，数值越小越靠前
+          example: 10
+
+    Schedule:
+      type: object
+      properties:
+        scheduleId:
+          type: integer
+          example: 101
+        doctorNumber:
+          type: string
+          example: "DOC001"
+        doctorName:
+          type: string
+          example: "张医生"
+        title:
+          type: string
+          example: "主任医师"
+        roomName:
+          type: string
+          example: "3楼302诊室"
+        startTime:
+          type: string
+          format: time
+          example: "08:00:00"
+        endTime:
+          type: string
+          format: time
+          example: "12:00:00"
+
+    RegistrationRequest:
+      type: object
+      required: [scheduleId, appointmentDate]
+      properties:
+        scheduleId:
+          type: integer
+          description: 排班 ID
+        appointmentDate:
+          type: string
+          format: date
+          example: "2026-04-12"
+
+    RegistrationResponse:
+      type: object
+      properties:
+        registrationId:
+          type: integer
+          example: 5001
+        patientId:
+          type: integer
+          example: 1001
+        patientName:
+          type: string
+          example: "张三"
+        doctorName:
+          type: string
+          example: "张医生"
+        appointmentDate:
+          type: string
+          format: date
+          example: "2026-04-12"
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, CANCELLED]
+          description: PENDING-待就诊, COMPLETED-已就诊, CANCELLED-已取消
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-04-12T08:00:00+08:00"
+          description: 挂号操作时间
+
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: "ERR_SCHEDULE_FULL"
+        message:
+          type: string
+          example: "该排班号源已满"
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: 未授权或 Token 无效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: 业务冲突
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalError:
+      description: 内部服务器错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
