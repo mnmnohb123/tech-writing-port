@@ -3,49 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <title>平安医院挂号 API 文档</title>
+  <!-- 引入 Swagger UI 样式 -->
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
-  <style>
-    /* 页面标题样式 */
-    #swagger-header {
-      text-align: center;
-      margin: 20px 0 10px 0;
-      font-family: Arial, sans-serif;
-    }
-    #swagger-subtitle {
-      text-align: center;
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 20px;
-    }
-  </style>
 </head>
 <body>
-  <!-- 页面展示标题 -->
-  <div id="swagger-header">
-    <h1 style="color:#2a9d8f;">平安医院挂号模块 API 文档</h1>
-    <div id="swagger-subtitle">
-      Updated on 2026-04-12 | Version 1.1.0
-    </div>
-  </div>
-
-  <!-- Swagger UI 容器 -->
+  <!-- Swagger UI 挂载点 -->
   <div id="swagger-ui"></div>
 
-  <!-- Swagger UI 脚本 -->
+  <!-- 引入 Swagger UI 核心库和预设 -->
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
   <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
   <script>
+    // 页面加载完成后初始化 Swagger UI
     window.onload = () => {
       const ui = SwaggerUIBundle({
-        url: "registration.yaml",       // 指向你的 YAML 文件
+        url: "registration.yaml",       // 指向 API 定义文件
         dom_id: "#swagger-ui",
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
         ],
         layout: "BaseLayout",
-        docExpansion: "none",
-        deepLinking: true
+        docExpansion: "none",          // 默认折叠接口详情
+        deepLinking: true              // 启用 URL 深链接
       });
       window.ui = ui;
     };
