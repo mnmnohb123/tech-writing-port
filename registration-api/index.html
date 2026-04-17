@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>平安医院挂号 API 文档</title>
-  <!-- 引入 Swagger UI 样式 -->
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平安医院门诊管理系统 - 挂号模块 API 文档</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .topbar {
+            display: none;
+        }
+        .swagger-ui .topbar {
+            background-color: #1b7c7c;
+        }
+    </style>
 </head>
 <body>
-  <!-- Swagger UI 挂载点 -->
-  <div id="swagger-ui"></div>
-
-  <!-- 引入 Swagger UI 核心库和预设 -->
-  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
-  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
-  <script>
-    // 页面加载完成后初始化 Swagger UI
-    window.onload = () => {
-      const ui = SwaggerUIBundle({
-        url: "registration.yaml",       // 指向 API 定义文件
-        dom_id: "#swagger-ui",
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "BaseLayout",
-        docExpansion: "none",          // 默认折叠接口详情
-        deepLinking: true              // 启用 URL 深链接
-      });
-      window.ui = ui;
-    };
-  </script>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+        window.onload = () => {
+            SwaggerUIBundle({
+                url: "registration.yaml",   
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis
+                ],
+                layout: "BaseLayout",
+                defaultModelsExpandDepth: 1,   // 控制模型默认展开层级
+                defaultModelExpandDepth: 1,
+                displayOperationId: false,
+                tryItOutEnabled: true,          // 开启“尝试运行”功能（模拟调用）
+            });
+        };
+    </script>
 </body>
 </html>
