@@ -3,10 +3,10 @@
 本仓库包含两个独立的技术文档项目，展示不同场景下的文档编写能力。
 
 ## 📁 项目一：平安医院挂号模块 API 文档（OpenAPI）
+- **在线预览**：[点击查看](https://mnmnohb123.github.io/tech-writing-port/registration-api/index.html)
 - **路径**：[registration-api/](./registration-api/)
 - **内容**：门诊挂号系统 RESTful API 规范，涵盖科室、排班、预约、挂号记录等资源。
 - **技术栈**：OpenAPI 3.0.3 / Swagger UI
-- **使用**：浏览器打开 `index.html` 即可浏览和测试接口。
 
 ## 📁 项目二：Datasette 场景化入门指南
 - **路径**：[stardew-guide/](./stardew-guide/)
